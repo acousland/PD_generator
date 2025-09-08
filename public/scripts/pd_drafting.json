@@ -1,0 +1,32 @@
+{
+  "title": "Draft a Position Description",
+  "options": { "typingSpeed": 38, "messageDelayMs": 450 },
+  "messages": [
+    { "role": "assistant", "content": "Let's draft a Position Description (PD). I’ll ask a few questions to clarify the role." },
+    { "role": "assistant", "content": "First, what’s the role title and the team it sits within?" },
+    { "role": "user", "content": "Senior Data Engineer in the Analytics Platform team." },
+
+    { "role": "assistant", "content": "Great. What are the top 3 responsibilities?" },
+    { "role": "user", "content": "1) Build and maintain data pipelines. 2) Improve our data platform reliability. 3) Mentor engineers." },
+
+    { "role": "assistant", "content": "Any must-have skills or certifications?" },
+    { "role": "user", "content": "5+ years in data eng, Python, SQL, Airflow, dbt, cloud (AWS), observability. No formal certs required." },
+
+    { "role": "assistant", "content": "Level and contract details? (e.g. pay band, location, working arrangement)" },
+    { "role": "user", "content": "Pay band 8, Sydney preferred, hybrid 3 days in-office." },
+
+    { "role": "assistant", "content": "I’ll fetch relevant policies and similar PDs to align phrasing and benefits." },
+    { "role": "assistant", "kind": "tool_call", "toolCall": { "name": "hr_kb.search", "args": { "topics": ["position description template", "benefits", "hybrid policy"], "limit": 5 } }, "durationMs": 1400 },
+    { "role": "assistant", "kind": "tool_result", "toolResult": { "name": "hr_kb.search", "summary": "Found template and policy references.", "output": "• PD template v3.2\n• Hybrid Work Policy (2024)\n• Benefits Summary (Bands 7–9)" } },
+
+    { "role": "assistant", "kind": "tool_call", "toolCall": { "name": "pd_repo.findSimilar", "args": { "title": "Senior Data Engineer", "team": "Analytics Platform", "limit": 3 } }, "durationMs": 1300 },
+    { "role": "assistant", "kind": "tool_result", "toolResult": { "name": "pd_repo.findSimilar", "summary": "Located 3 related PDs.", "output": "• Senior Data Engineer — Data Ops (2024-05)\n• Data Platform Engineer — Core Data (2024-02)\n• Senior Analytics Engineer — BI (2023-11)" } },
+
+    { "role": "assistant", "content": "Drafting the PD summary and key sections with your inputs and the org’s template and policies." },
+
+    { "role": "assistant", "content": "Position: Senior Data Engineer (Analytics Platform)\nLevel: Band 8 — Hybrid (Sydney preferred)\nSummary: The Senior Data Engineer designs, builds, and maintains reliable data pipelines and platform capabilities enabling analytics at scale. This role improves platform reliability and observability, and mentors engineers to uplift best practices.\nKey Responsibilities:\n• Build and maintain robust data ingestion and transformation pipelines (Python, SQL, Airflow, dbt).\n• Improve data platform reliability, performance, and observability (monitoring, alerting, SLOs).\n• Collaborate with platform, analytics, and product teams to deliver trusted data products.\n• Champion engineering standards, documentation, and operational excellence.\n• Mentor engineers and contribute to hiring and onboarding.\nSkills & Experience:\n• 5+ years in data engineering with production-grade ETL/ELT.\n• Strong Python and SQL, orchestration (Airflow), and transformation (dbt).\n• Cloud data platforms (AWS), CI/CD, IaC, and observability tooling.\n• Communication skills to partner across technical and non-technical stakeholders.\nPolicies & Benefits:\n• Hybrid Work Policy (3 days in-office).\n• Benefits aligned to Bands 7–9 (leave, health, allowances)." },
+
+    { "role": "assistant", "content": "I’ve packaged this PD into a document. You can download it here: /downloads/pd_senior_data_engineer.docx" },
+    { "role": "assistant", "content": "Need edits to responsibilities, skills, or summary? I can regenerate specific sections." }
+  ]
+}

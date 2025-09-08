@@ -1,0 +1,17 @@
+{
+  "title": "Sample onboarding demo",
+  "options": { "typingSpeed": 35, "messageDelayMs": 500 },
+  "messages": [
+    { "role": "user", "content": "Hey, can you explain what this app does?" },
+    { "role": "assistant", "content": "Sure. This is a simple ChatGPT-style player. It reads a script from JSON and replays the conversation with typing animations." },
+    { "role": "user", "content": "How do I provide my own script?" },
+    { "role": "assistant", "content": "Two ways:\n1) Replace public/scripts/demo.json with your content.\n2) Use the Load JSON button to pick a file from your computer." },
+    { "role": "user", "content": "What format should the script be in?" },
+  { "role": "assistant", "content": "Use a JSON object: { messages: [{ role: 'user'|'assistant', content: string }], options?: { typingSpeed?: number, messageDelayMs?: number } }" },
+  { "role": "user", "content": "Show me a fake tool call like Claude or ChatGPT tools." },
+  { "role": "assistant", "kind": "tool_call", "toolCall": { "name": "search_web", "args": { "query": "Weather in Paris today", "limit": 3 } }, "durationMs": 1500 },
+  { "role": "assistant", "kind": "tool_result", "toolResult": { "name": "search_web", "summary": "Found 3 results.", "output": "1) MeteoParis — 24°C, partly cloudy\n2) Weather.com — High 25°C, Low 17°C, 10% rain\n3) AccuWeather — Mild with some sun" } },
+  { "role": "assistant", "content": "Looks like Paris is around 24–25°C and partly cloudy today." },
+  { "role": "assistant", "content": "Enjoy!" }
+  ]
+}
