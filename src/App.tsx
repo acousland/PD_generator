@@ -4,7 +4,7 @@ import LiveChat from './components/LiveChat';
 import type { ChatScript } from './types';
 import { parseTextScript } from './utils/parseTextScript';
 
-type Mode = 'script' | 'live';
+type Mode = 'script' | 'live' | 'script-live';
 
 export default function App() {
   const [script, setScript] = useState<ChatScript | null>(null);
@@ -67,6 +67,7 @@ export default function App() {
           >
             <option value="script">Script Mode</option>
             <option value="live">Live Mode</option>
+            <option value="script-live">Script (Live Skin)</option>
           </select>
           {mode === 'script' && (
             <>
@@ -92,11 +93,9 @@ export default function App() {
         </div>
       )}
       <div style={{ flex: 1 }}>
-        {mode === 'script' ? (
-          <ChatPlayer script={script} />
-        ) : (
-          <LiveChat />
-        )}
+  {mode === 'script' && <ChatPlayer script={script} layout="classic" />}
+  {mode === 'script-live' && <ChatPlayer script={script} layout="live" />}
+  {mode === 'live' && <LiveChat />}
       </div>
     </div>
   );

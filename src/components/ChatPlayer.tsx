@@ -10,6 +10,7 @@ interface Props {
   script?: ChatScript | null;
   defaultTypingSpeed?: number; // chars per second
   defaultDelayMs?: number;
+  layout?: 'classic' | 'live';
 }
 
 function useAutoScroll(dep: unknown) {
@@ -22,7 +23,7 @@ function useAutoScroll(dep: unknown) {
   return ref;
 }
 
-export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDelayMs = 500 }: Props) {
+export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDelayMs = 500, layout = 'classic' }: Props) {
   const [status, setStatus] = useState<Status>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [typed, setTyped] = useState('');
@@ -118,23 +119,104 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
     }
   };
 
-  return (
-    <div className="container">
-      <div className="header">
-        <span className="badge">Script Player</span>
-        <span className="brand">{script?.title ?? 'Untitled Script'}</span>
-        <div className="controls">
-          {status !== 'playing' ? (
-            <button onClick={play}>Play</button>
-          ) : (
-            <button onClick={pause}>Pause</button>
-          )}
-          <button onClick={restart}>Restart</button>
-          <button onClick={skip} disabled={!current}>Skip typing</button>
-          <button onClick={next} disabled={!current}>Next</button>
+  const header = layout === 'classic' && (
+    <div className="header">
+      <span className="badge">Script Player</span>
+      <span className="brand">{script?.title ?? 'Untitled Script'}</span>
+      <div className="controls">
+        {status !== 'playing' ? (
+          <button onClick={play}>Play</button>
+        ) : (
+          <button onClick={pause}>Pause</button>
+        )}
+        <button onClick={restart}>Restart</button>
+        <button onClick={skip} disabled={!current}>Skip typing</button>
+        <button onClick={next} disabled={!current}>Next</button>
+      </div>
+    </div>
+  );
+
+  const footerClassic = layout === 'classic' && (
+    <div className="footer">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <label className="mono">Speed</label>
+        <input
+          type="range"
+          min={5}
+          max={80}
+          value={speed}
+          onChange={(e) => setSpeed(parseInt(e.target.value, 10))}
+        />
+        <span className="hint">{speed} cps</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <label className="mono">Delay</label>
+        <input
+          type="range"
+          min={0}
+          max={2000}
+          step={50}
+          value={delayMs}
+          onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
+        />
+        <span className="hint">{delayMs} ms</span>
+      </div>
+      <div className="spacer" />
+      <span className="hint">{status.toUpperCase()}</span>
+    </div>
+  );
+
+  const composerLive = layout === 'live' && (
+    <div className="composer" style={{ paddingTop: 12 }}>
+      <div className="composer-inner" style={{ alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+          <div style={{ fontSize: 13, opacity: 0.85 }} className="mono">
+            {script?.title || 'Script'} • {status.toUpperCase()} {current ? `(${idx + (typed ? 1 : 0)}/${script?.messages.length})` : ''}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }} className="composer-controls">
+            {status !== 'playing' ? (
+              <button onClick={play}>Play</button>
+            ) : (
+              <button onClick={pause}>Pause</button>
+            )}
+            <button onClick={restart}>Restart</button>
+            <button onClick={skip} disabled={!current || (current.kind && current.kind !== 'message')}>Skip Typing</button>
+            <button onClick={next} disabled={!current}>Next</button>
+            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              Speed
+              <input
+                type="range"
+                min={5}
+                max={80}
+                value={speed}
+                onChange={(e) => setSpeed(parseInt(e.target.value, 10))}
+                style={{ width: 110 }}
+              />
+              <span className="hint">{speed}</span>
+            </label>
+            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              Delay
+              <input
+                type="range"
+                min={0}
+                max={2000}
+                step={50}
+                value={delayMs}
+                onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
+                style={{ width: 120 }}
+              />
+              <span className="hint">{delayMs}ms</span>
+            </label>
+          </div>
         </div>
       </div>
+      <div className="composer-hint hint">Playback skin only – scripted conversation.</div>
+    </div>
+  );
 
+  return (
+    <div className="container">
+      {header}
       <div className="chat" ref={containerRef}>
         <AnimatePresence initial={false}>
           {messages.map((m, i) => (
@@ -155,34 +237,8 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
           )}
         </AnimatePresence>
       </div>
-
-      <div className="footer">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <label className="mono">Speed</label>
-          <input
-            type="range"
-            min={5}
-            max={80}
-            value={speed}
-            onChange={(e) => setSpeed(parseInt(e.target.value, 10))}
-          />
-          <span className="hint">{speed} cps</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <label className="mono">Delay</label>
-          <input
-            type="range"
-            min={0}
-            max={2000}
-            step={50}
-            value={delayMs}
-            onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
-          />
-          <span className="hint">{delayMs} ms</span>
-        </div>
-        <div className="spacer" />
-        <span className="hint">{status.toUpperCase()}</span>
-      </div>
+      {footerClassic}
+      {composerLive}
     </div>
   );
 }
