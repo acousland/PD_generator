@@ -168,3 +168,56 @@ body::after {
 .spacer { flex: 1; }
 
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+/* Composer (live chat) */
+.composer {
+  position: relative;
+  padding: 16px 18px 22px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.35) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-top: 1px solid var(--border);
+}
+.composer-inner {
+  display: flex;
+  gap: 10px;
+  background: var(--glass-bg);
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--glass-shadow);
+}
+.composer-inner textarea {
+  flex: 1;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e5ecf5;
+  font: inherit;
+  line-height: 1.4;
+  max-height: 220px;
+}
+.composer-actions { display: flex; align-items: flex-end; }
+.composer-actions button {
+  background: linear-gradient(135deg, rgba(96,165,250,0.22), rgba(96,165,250,0.08));
+  border: 1px solid rgba(96,165,250,0.45);
+  color: #e7f1ff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  transition: background 160ms ease, transform 120ms ease;
+}
+.composer-actions button:hover { background: linear-gradient(135deg, rgba(96,165,250,0.32), rgba(96,165,250,0.12)); }
+.composer-actions button:active { transform: translateY(1px); }
+.composer-actions button:disabled { opacity: 0.4; cursor: default; }
+.composer-hint { font-size: 11px; }
