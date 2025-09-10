@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ChatScript, Message } from '../types';
 import ChatMessage from './ChatMessage';
@@ -6,11 +6,32 @@ import ToolBubble from './ToolBubble';
 
 type Status = 'idle' | 'playing' | 'paused' | 'finished' | 'error';
 
+export interface ChatPlayerHandle {
+  play: () => void;
+  pause: () => void;
+  restart: () => void;
+  skip: () => void;
+  next: () => void;
+  setSpeed: (n: number) => void;
+  setDelay: (ms: number) => void;
+  getState: () => PlayerStateSnapshot;
+}
+
+export interface PlayerStateSnapshot {
+  status: Status;
+  speed: number;
+  delayMs: number;
+  idx: number;
+  total: number;
+  isUserStaging: boolean;
+}
+
 interface Props {
   script?: ChatScript | null;
   defaultTypingSpeed?: number; // chars per second
   defaultDelayMs?: number;
   layout?: 'classic' | 'live' | 'liveScript';
+  onState?: (s: PlayerStateSnapshot) => void;
 }
 
 function useAutoScroll(dep: unknown) {
@@ -23,7 +44,7 @@ function useAutoScroll(dep: unknown) {
   return ref;
 }
 
-export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDelayMs = 500, layout = 'classic' }: Props) {
+const ChatPlayer = forwardRef<ChatPlayerHandle, Props>(function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDelayMs = 500, layout = 'classic', onState }, ref) {
   const [status, setStatus] = useState<Status>('idle');
   const [messages, setMessages] = useState<Message[]>([]); // committed messages
   const [typed, setTyped] = useState(''); // assistant typing buffer
@@ -136,6 +157,7 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
     setMessages([]);
     setTyped('');
     setIdx(0);
+    setComposerText('');
     setStatus('playing');
   };
   const skip = () => {
@@ -166,20 +188,22 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
   };
 
   const header = (layout === 'classic' || layout === 'liveScript') && (
-    <div className="header">
-      <span className="badge">Script Player</span>
-      <span className="brand">{script?.title ?? 'Untitled Script'}</span>
-      <div className="controls">
-        {status !== 'playing' ? (
-          <button onClick={play}>Play</button>
-        ) : (
-          <button onClick={pause}>Pause</button>
-        )}
-        <button onClick={restart}>Restart</button>
-        <button onClick={skip} disabled={!current}>Skip typing</button>
-        <button onClick={next} disabled={!current}>Next</button>
+    layout === 'classic' ? (
+      <div className="header">
+        <span className="badge">Script Player</span>
+        <span className="brand">{script?.title ?? 'Untitled Script'}</span>
+        <div className="controls">
+          {status !== 'playing' ? (
+            <button onClick={play}>Play</button>
+          ) : (
+            <button onClick={pause}>Pause</button>
+          )}
+          <button onClick={restart}>Restart</button>
+          <button onClick={skip} disabled={!current}>Skip typing</button>
+          <button onClick={next} disabled={!current}>Next</button>
+        </div>
       </div>
-    </div>
+    ) : null
   );
 
   const footerClassic = layout === 'classic' && (
@@ -279,46 +303,42 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
           >
             {current?.role === 'user' ? composerText : ''}
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {status !== 'playing' ? (
-              <button onClick={play}>Play</button>
-            ) : (
-              <button onClick={pause}>Pause</button>
-            )}
-            <button onClick={restart}>Restart</button>
-            <button onClick={skip} disabled={!current}>Skip</button>
-            <button onClick={next} disabled={!current}>Next</button>
-            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              Speed
-              <input
-                type="range"
-                min={5}
-                max={80}
-                value={speed}
-                onChange={(e) => setSpeed(parseInt(e.target.value, 10))}
-                style={{ width: 110 }}
-              />
-              <span className="hint">{speed}</span>
-            </label>
-            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              Delay
-              <input
-                type="range"
-                min={0}
-                max={2000}
-                step={50}
-                value={delayMs}
-                onChange={(e) => setDelayMs(parseInt(e.target.value, 10))}
-                style={{ width: 120 }}
-              />
-              <span className="hint">{delayMs}ms</span>
-            </label>
-          </div>
         </div>
       </div>
       <div className="composer-hint hint">User messages are scripted; this input is a playback simulation.</div>
     </div>
   );
+
+  // expose state outward each render when dependencies change
+  useEffect(() => {
+    if (!onState || !script) return;
+    onState({
+      status,
+      speed,
+      delayMs,
+      idx,
+      total: script?.messages.length || 0,
+      isUserStaging: layout === 'liveScript' && current?.role === 'user',
+    });
+  }, [onState, status, speed, delayMs, idx, script, layout, current]);
+
+  useImperativeHandle(ref, () => ({
+    play,
+    pause,
+    restart,
+    skip,
+    next,
+    setSpeed,
+    setDelay: setDelayMs,
+    getState: () => ({
+      status,
+      speed,
+      delayMs,
+      idx,
+      total: script?.messages.length || 0,
+      isUserStaging: layout === 'liveScript' && current?.role === 'user',
+    }),
+  }), [play, pause, restart, skip, next, speed, delayMs, idx, script, layout, current]);
 
   return (
     <div className="container">
@@ -348,4 +368,6 @@ export default function ChatPlayer({ script, defaultTypingSpeed = 35, defaultDel
   {composerScriptLive}
     </div>
   );
-}
+});
+
+export default ChatPlayer;

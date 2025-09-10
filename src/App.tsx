@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ChatPlayer from './components/ChatPlayer';
+import ChatPlayer, { ChatPlayerHandle, PlayerStateSnapshot } from './components/ChatPlayer';
 import type { ChatScript } from './types';
 import { parseTextScript } from './utils/parseTextScript';
 
@@ -7,6 +7,8 @@ export default function App() {
   const [script, setScript] = useState<ChatScript | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [path, setPath] = useState<string>('/scripts/demo.json');
+  const playerRef = React.useRef<ChatPlayerHandle | null>(null);
+  const [playerState, setPlayerState] = useState<PlayerStateSnapshot | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -55,7 +57,47 @@ export default function App() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="header">
         <span className="brand">Scripted Live Chat</span>
-        <div className="controls">
+        <div className="controls" style={{ alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {playerState?.status !== 'playing' ? (
+              <button onClick={() => playerRef.current?.play()}>Play</button>
+            ) : (
+              <button onClick={() => playerRef.current?.pause()}>Pause</button>
+            )}
+            <button onClick={() => playerRef.current?.restart()}>Restart</button>
+            <button onClick={() => playerRef.current?.skip()} disabled={!playerState}>Skip</button>
+            <button onClick={() => playerRef.current?.next()} disabled={!playerState}>Next</button>
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', paddingLeft: 12 }}>
+            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              Speed
+              <input
+                type="range"
+                min={5}
+                max={80}
+                value={playerState?.speed ?? 35}
+                onChange={(e) => playerRef.current?.setSpeed(parseInt(e.target.value, 10))}
+                style={{ width: 90 }}
+              />
+              <span className="hint">{playerState?.speed}</span>
+            </label>
+            <label className="mono" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              Delay
+              <input
+                type="range"
+                min={0}
+                max={2000}
+                step={50}
+                value={playerState?.delayMs ?? 500}
+                onChange={(e) => playerRef.current?.setDelay(parseInt(e.target.value, 10))}
+                style={{ width: 100 }}
+              />
+              <span className="hint">{playerState?.delayMs}ms</span>
+            </label>
+            <span className="hint mono" style={{ paddingLeft: 4 }}>
+              {playerState ? `${playerState.status.toUpperCase()} ${playerState.idx + 1}/${playerState.total}` : 'IDLE'}
+            </span>
+          </div>
           <label className="file-input">
             <input type="file" accept="application/json,text/plain" onChange={onPickFile} style={{ display: 'none' }} />
             <span>Load JSON…</span>
@@ -76,7 +118,12 @@ export default function App() {
         </div>
       )}
       <div style={{ flex: 1 }}>
-        <ChatPlayer script={script} layout="liveScript" />
+        <ChatPlayer
+          ref={playerRef}
+          script={script}
+          layout="liveScript"
+          onState={setPlayerState}
+        />
       </div>
     </div>
   );
