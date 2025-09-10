@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import ChatPlayer from './components/ChatPlayer';
-import LiveChat from './components/LiveChat';
 import type { ChatScript } from './types';
 import { parseTextScript } from './utils/parseTextScript';
-
-type Mode = 'script' | 'live' | 'script-live';
 
 export default function App() {
   const [script, setScript] = useState<ChatScript | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [path, setPath] = useState<string>('/scripts/demo.json');
-  const [mode, setMode] = useState<Mode>('script');
 
   useEffect(() => {
     let cancelled = false;
@@ -58,33 +54,20 @@ export default function App() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="header">
-        <span className="brand">Chat Playground</span>
+        <span className="brand">Scripted Live Chat</span>
         <div className="controls">
-          <select
-            value={mode}
-            onChange={(e) => setMode(e.target.value as Mode)}
-            style={{ background: 'var(--glass-bg)', color: 'inherit', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 8px' }}
-          >
-            <option value="script">Script Mode</option>
-            <option value="live">Live Mode</option>
-            <option value="script-live">Script (Live Skin)</option>
-          </select>
-          {mode === 'script' && (
-            <>
-              <label className="file-input">
-                <input type="file" accept="application/json,text/plain" onChange={onPickFile} style={{ display: 'none' }} />
-                <span>Load JSON…</span>
-              </label>
-              <input
-                className="mono"
-                style={{ width: 320 }}
-                value={path}
-                onChange={(e) => setPath(e.target.value)}
-                placeholder="/scripts/demo.json"
-              />
-              <button onClick={() => setPath(path)}>Reload</button>
-            </>
-          )}
+          <label className="file-input">
+            <input type="file" accept="application/json,text/plain" onChange={onPickFile} style={{ display: 'none' }} />
+            <span>Load JSON…</span>
+          </label>
+          <input
+            className="mono"
+            style={{ width: 320 }}
+            value={path}
+            onChange={(e) => setPath(e.target.value)}
+            placeholder="/scripts/demo.json"
+          />
+          <button onClick={() => setPath(path)}>Reload</button>
         </div>
       </div>
       {error && (
@@ -93,9 +76,7 @@ export default function App() {
         </div>
       )}
       <div style={{ flex: 1 }}>
-  {mode === 'script' && <ChatPlayer script={script} layout="classic" />}
-  {mode === 'script-live' && <ChatPlayer script={script} layout="live" />}
-  {mode === 'live' && <LiveChat />}
+        <ChatPlayer script={script} layout="liveScript" />
       </div>
     </div>
   );
