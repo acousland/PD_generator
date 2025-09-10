@@ -288,9 +288,6 @@ const ChatPlayer = forwardRef<ChatPlayerHandle, Props>(function ChatPlayer({ scr
     <div className="composer" style={{ paddingTop: 12 }}>
       <div className="composer-inner" style={{ alignItems: 'flex-start' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 13, opacity: 0.85 }} className="mono">
-            {script?.title || 'Script'} • {status.toUpperCase()} {current ? `(${idx + 1}/${script?.messages.length})` : ''}
-          </div>
           <div
             style={{
               minHeight: 22,
