@@ -46,6 +46,7 @@ body::after {
   position: relative;
   z-index: 1;
   backdrop-filter: blur(2px);
+  overflow: hidden; /* Keep composer visible; only chat scrolls */
 }
 
 .header {
